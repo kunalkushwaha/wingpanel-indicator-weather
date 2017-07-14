@@ -18,55 +18,84 @@
  */
 
 public class Weather.Indicator : Wingpanel.Indicator {
-    private const string ICON_NAME = "weather-application";
+    Weather.Widgets.DisplayWidget? display_widget = null;
 
     private Wingpanel.IndicatorManager.ServerType server_type;
-    private Wingpanel.Widgets.OverlayIcon indicator_icon;
-
 
     private const string WEATHER_APP = "Weather App";
 
     private Gtk.Grid main_grid;
+    
+    private File config;
+    
+    private string key;
 
     public Indicator (Wingpanel.IndicatorManager.ServerType server_type) {
         Object (code_name: WEATHER_APP,
                 display_name: _("Weather"),
                 description: _("The Weather indicator"));
                 
+        try {
+            config = File.new_for_path (Environment.get_home_dir() + "/.weather.config");
+            stderr.printf("home dir: %s\n",Environment.get_home_dir());
+            
+            if (config.query_exists ()) {
+
+		        var parser = new Json.Parser ();
+                var dis = new DataInputStream (config.read ());
+		        
+                parser.load_from_stream(dis,null);
+
+                var root_object = parser.get_root ().get_object ();
+                key = root_object.get_string_member ("key");
+            }
+            else {
+                    stderr.printf("config file NOT FOUND!\n");
+            }
+
+        }catch (Error e) {
+		    stderr.printf ("Error: %s\n", e.message);
+		    return;
+	        
+        }
+                  
         this.server_type = server_type;
     }
 
     public override Gtk.Widget get_display_widget () {
-        if (indicator_icon == null) {
-            indicator_icon = new Wingpanel.Widgets.OverlayIcon (ICON_NAME);
-            indicator_icon.button_press_event.connect ((e) => {
-                if (e.button == Gdk.BUTTON_MIDDLE) {
-                    close ();
-                    return Gdk.EVENT_STOP;
-                }
-
-                return Gdk.EVENT_PROPAGATE;
-            });
+    
+        if (display_widget == null) {
+            display_widget = new Widgets.DisplayWidget ();
         }
 
-        return indicator_icon;
+        visible = true;
+
+        return display_widget;
     }
 
     public override Gtk.Widget? get_widget () {
-        if (main_grid == null) {
-             debug ("grid is null");
-        }
-        
+        //TODO: popup to show details like location, temp and discriptive forcast.
         this.visible = true;
-
-        return main_grid;
+        
+        monitor_weather.begin((obj, res)=> {
+            monitor_weather.end(res);
+        });
+        
+        return null;
     }
 
- 
+    private async void monitor_weather() {
+
+        var result = get_weather("",key);
+        display_widget.update_state(result.short_discription,result.temperature);
+        
+    }
 
     public void connections () {}
   
-    public override void opened () {}
+    public override void opened () {
+
+    }
         
     public override void closed () {}
 
