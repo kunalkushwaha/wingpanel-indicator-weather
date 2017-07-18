@@ -16,7 +16,7 @@ string get_ip(Soup.Session session) {
     
 }
 
- weatherInfo get_weather(string location, string secret_key) {
+ async void get_weather(uint interval, string location, string secret_key, Weather.Widgets.DisplayWidget display_widget) {
 
     //Init the session.    
     var session = new Soup.Session ();
@@ -27,56 +27,59 @@ string get_ip(Soup.Session session) {
     string uri = "https://api.darksky.net/forecast/" + secret_key + "/";
 
 
-   
+
+   GLib.Timeout.add_seconds (interval, () => {
     // Get Location.
-    double lat, lon; 
+    double lat=0, lon=0; 
     var query_location = new Soup.Message ("GET", loc_uri);
     session.send_message (query_location);
     
     try {
-	    var parser = new Json.Parser();
+        var parser = new Json.Parser();
 
-	    parser.load_from_data((string) query_location.response_body.flatten().data, -1);
+        parser.load_from_data((string) query_location.response_body.flatten().data, -1);
 
-	    var root_object = parser.get_root().get_object();
-	    lat = root_object.get_double_member("latitude");
-	    lon = root_object.get_double_member("longitude");
+        var root_object = parser.get_root().get_object();
+        lat = root_object.get_double_member("latitude");
+        lon = root_object.get_double_member("longitude");
         var city = root_object.get_string_member("city");
 
         stderr.printf("Location : lat : %g, lon : %g \n", lat, lon);
         stderr.printf("Location : City: %s \n", city);
         
     }catch (Error e){
-	    stderr.printf(" Unable to get location\n");
-	    return info ;
+        stderr.printf(" Unable to get location\n");
+       // return;// info ;
     }
-    
-
-
-    var weather_uri = uri + lat.to_string() + "," + lon.to_string();
-    var message = new Soup.Message ("GET", weather_uri);
-    session.send_message (message);
-
-   
-    try {
-        var parser = new Json.Parser ();
-      
-        parser.load_from_data ((string) message.response_body.flatten().data, -1);
-
-        var root_object = parser.get_root ().get_object ();
-        var currently = root_object.get_object_member ("currently");
-        var summary = currently.get_string_member ("summary");
-        var temp = currently.get_double_member("temperature");
         
-        stderr.printf("current : %s\n", summary);
-        info.short_discription = summary;
-        info.temperature = temp;
-	    
 
-    } catch (Error e) {
-        stderr.printf ("I guess something is not working... %s \n", e.message);
-    }
+        var weather_uri = uri + lat.to_string() + "," + lon.to_string();
+        var message = new Soup.Message ("GET", weather_uri);
+        session.send_message (message);
 
-	return info;
+    
+        try {
+            var parser = new Json.Parser ();
+        
+            parser.load_from_data ((string) message.response_body.flatten().data, -1);
 
+            var root_object = parser.get_root ().get_object ();
+            var currently = root_object.get_object_member ("currently");
+            var summary = currently.get_string_member ("summary");
+            var temp = currently.get_double_member("temperature");
+            
+            stderr.printf("current : %s\n", summary);
+            info.short_discription = summary;
+            info.temperature = temp;
+            
+
+        } catch (Error e) {
+            stderr.printf ("I guess something is not working... %s \n", e.message);
+        }
+        display_widget.update_state(info.short_discription,info.temperature);
+        return false;
+    },GLib.Priority.DEFAULT);
+    yield;
+    
+    return;
 }

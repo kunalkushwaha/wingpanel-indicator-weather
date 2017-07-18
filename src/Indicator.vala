@@ -85,17 +85,13 @@ public class Weather.Indicator : Wingpanel.Indicator {
     }
 
     private async void monitor_weather() {
-
-        var result = get_weather("",key);
-        display_widget.update_state(result.short_discription,result.temperature);
-        
+         get_weather(30 ,"",key, display_widget);
+             
     }
 
     public void connections () {}
   
-    public override void opened () {
-
-    }
+    public override void opened () {}
         
     public override void closed () {}
 
