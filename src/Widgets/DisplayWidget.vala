@@ -30,6 +30,7 @@ public class Weather.Widgets.DisplayWidget : Gtk.Box {
         case "Clear":
             image.icon_name = "weather-clear-symbolic";
             break;
+        case "Drizzle":
         case "Light Rain":
             image.icon_name = "weather-showers-scattered-symbolic";
             break;

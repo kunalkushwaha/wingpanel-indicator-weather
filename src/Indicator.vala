@@ -69,14 +69,12 @@ public class Weather.Indicator : Wingpanel.Indicator {
         }
 
         visible = true;
-
         return display_widget;
     }
 
     public override Gtk.Widget? get_widget () {
         //TODO: popup to show details like location, temp and discriptive forcast.
         this.visible = true;
-        
         monitor_weather.begin((obj, res)=> {
             monitor_weather.end(res);
         });
@@ -93,16 +91,14 @@ public class Weather.Indicator : Wingpanel.Indicator {
 
     public void connections () {}
   
-    public override void opened () {
-
-    }
+    public override void opened () {}
         
     public override void closed () {}
 
 }
 
 public Wingpanel.Indicator? get_indicator (Module module, Wingpanel.IndicatorManager.ServerType server_type) {
-    debug ("Activating Sample Indicator");
+    debug ("Activating Weather Indicator");
     var indicator = new Weather.Indicator (server_type);
 
     return indicator;
