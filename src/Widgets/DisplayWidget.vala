@@ -54,7 +54,7 @@ public class Weather.Widgets.DisplayWidget : Gtk.Box {
         default:
             //TODO: Find better icon (\ over weather icon.')
             image.icon_name = "weather-clear-symbolic";
-            
+            degree.label = "\n000d8"
             break;
         }
     }
