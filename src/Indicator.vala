@@ -85,8 +85,14 @@ public class Weather.Indicator : Wingpanel.Indicator {
     }
 
     private async void monitor_weather() {
-         get_weather(30 ,"",key, display_widget);
-             
+        //Fetch Report every 30 Minutes
+        //TODO: Should be read from configuration file
+        get_weather("",key, display_widget);
+        GLib.Timeout.add_seconds (1800, () => {
+            get_weather("",key, display_widget);
+            return true;
+        },GLib.Priority.DEFAULT);
+        yield;
     }
 
     public void connections () {}
