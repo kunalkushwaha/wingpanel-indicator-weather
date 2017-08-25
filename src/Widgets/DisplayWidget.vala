@@ -42,6 +42,7 @@ public class Weather.Widgets.DisplayWidget : Gtk.Box {
             break;
         case "Partly Cloudy":
         case "Cloudy":
+        case "Humid and Mostly Cloudy":
         case "Mostly Cloudy":
             image.icon_name = "weather-few-clouds-symbolic";
             break;
@@ -51,10 +52,13 @@ public class Weather.Widgets.DisplayWidget : Gtk.Box {
         case "Breezy":
             image.icon_name = "weather-windy-symbolic";
             break;    
+        case "Breezy and Overcast":
+            image.icon_name = "weather-windy-symbolic";
+            break;
         default:
             //TODO: Find better icon (\ over weather icon.')
             image.icon_name = "weather-clear-symbolic";
-            degree.label = "\n000d8";
+            degree.label = "(N/A)";
             break;
         }
     }
