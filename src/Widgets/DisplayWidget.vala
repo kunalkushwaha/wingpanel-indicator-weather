@@ -23,43 +23,38 @@ public class Weather.Widgets.DisplayWidget : Gtk.Box {
         // Convert the F to C and copy in label.
         var degreeTemp =  (temperature - 32.0)*(0.55);
         char[] buf = new char[double.DTOSTR_BUF_SIZE];
-	    unowned string str = degreeTemp.format (buf, "%2.2g");
+        unowned string str = degreeTemp.format (buf, "%2.2g");
+        string icon = "weather-clear-symbolic";
+        File map_file;
+
+     
+        degree.label = "(N/A)";
+
+        //Read file of weather discription and set icon accordingly.
+
+        try {
+            map_file = File.new_for_path (Environment.get_home_dir() + "/.weather-map.dat");
+            stderr.printf("home dir: %s\n",Environment.get_home_dir());
+            
+            if (map_file.query_exists ()) {
+
+		        var parser = new Json.Parser ();
+                var dis = new DataInputStream (map_file.read ());
+		        
+                parser.load_from_stream(dis,null);
+
+                var root_object = parser.get_root ().get_object ();
+                icon = root_object.get_string_member (state);
+            }
+            else {
+                    stderr.printf("map-file file NOT FOUND!\n");
+            }
+        }catch (Error e) {
+		    stderr.printf ("Error: %s\n", e.message);
+		    return;      
+        }       
+
+        image.icon_name = icon;
         degree.label = str + "\u00b0C";
-        
-        switch (state) {
-        case "Clear":
-            image.icon_name = "weather-clear-symbolic";
-            break;
-        case "Drizzle":
-        case "Light Rain":
-            image.icon_name = "weather-showers-scattered-symbolic";
-            break;
-        case "Rain":
-            image.icon_name = "weather-showers-symbolic";
-            break;
-        case "Snow":
-            image.icon_name = "weather-snow-symbolic";
-            break;
-        case "Partly Cloudy":
-        case "Cloudy":
-        case "Humid and Mostly Cloudy":
-        case "Mostly Cloudy":
-            image.icon_name = "weather-few-clouds-symbolic";
-            break;
-        case "Overcast":
-            image.icon_name = "weather-overcast-symbolic";
-            break;
-        case "Breezy":
-            image.icon_name = "weather-windy-symbolic";
-            break;    
-        case "Breezy and Overcast":
-            image.icon_name = "weather-windy-symbolic";
-            break;
-        default:
-            //TODO: Find better icon (\ over weather icon.')
-            image.icon_name = "weather-clear-symbolic";
-            degree.label = "(N/A)";
-            break;
-        }
     }
 }
